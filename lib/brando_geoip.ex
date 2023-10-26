@@ -3,7 +3,6 @@ defmodule BrandoGeoIP do
   Documentation for `BrandoGeoIP`.
   """
   import Plug.Conn
-  import Brando.I18n.Helpers
 
   def init(options), do: options
 
@@ -44,7 +43,16 @@ defmodule BrandoGeoIP do
   end
 
   defp redirect_with_lang(conn, lang) do
-    localized_index_path = localized_path(lang, :page_path, [conn, :index])
+    localized_index_path =
+      if Brando.config(:scope_default_language_routes) do
+        "/#{lang}"
+      else
+        if Brando.config(:default_language) == lang do
+          "/"
+        else
+          "/#{lang}"
+        end
+      end
 
     conn
     |> Phoenix.Controller.redirect(to: localized_index_path)
